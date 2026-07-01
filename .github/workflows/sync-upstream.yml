@@ -1,0 +1,33 @@
+name: Sync with upstream
+
+# Merges quodsoler/unreal-engine-skills into this fork daily, preserving our
+# local additions (e.g. .claude-plugin/plugin.json). A plain "Sync fork" would
+# fast-forward-fail because our history has diverged; --force would drop our
+# commits. Merging keeps both sides.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily 06:00 UTC
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge upstream/main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/quodsoler/unreal-engine-skills.git
+          git fetch upstream main
+          git merge upstream/main --no-edit
+          git push origin HEAD:main
