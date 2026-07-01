@@ -1,0 +1,9 @@
+{
+  "name": "ue-cpp-skills",
+  "version": "1.0.0",
+  "description": "27 AI agent skills for Unreal Engine C++ development (fork of quodsoler/unreal-engine-skills), source-audited against UE headers.",
+  "author": {
+    "name": "quodsoler",
+    "url": "https://github.com/quodsoler/unreal-engine-skills"
+  }
+}
