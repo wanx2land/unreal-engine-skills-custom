@@ -435,6 +435,14 @@ Custom movement flags that are not captured in `SetMoveFor` and restored in `Pre
 
 ---
 
+## Mover 2.0 Notes
+
+Everything above this section is the legacy `UCharacterMovementComponent` (CMC). UE 5.8's Mover plugin (`UCharacterMoverComponent` + movement modes + `UBaseMovementModeTransition`) is a separate, rollback-based system — don't mix the two mental models.
+
+**Gating `UBaseMovementModeTransition::Evaluate_Implementation` on a GAS gameplay tag — transition never fires at the intended speed threshold.** GAS-driven tags (e.g. an `IsCrouching` tag set by an ability) are applied with a tick of lag relative to the Mover simulation: by the time the tag is visible, the mode's own speed clamp for that tick has already reduced the proposed/actual velocity below the threshold you're checking, so the condition is never simultaneously true. Evaluate transitions using only tick-start simulation state instead: input intent from `FMoverInputCmdContext`/your custom `FMoverDataStructBase` inputs, and actual velocity from `FMoverSyncState` (e.g. `FMoverDefaultSyncState::GetVelocity_WorldSpace()`). This is also required for rollback safety — GAS/ASC state read from inside a resimulated tick doesn't roll back correctly.
+
+---
+
 ## Reference Files
 
 - `references/cmc-extension-patterns.md` — Complete CMC subclass templates: custom FSavedMove, prediction data, GetPredictionData_Client, wall-run PhysCustom, and custom network move data

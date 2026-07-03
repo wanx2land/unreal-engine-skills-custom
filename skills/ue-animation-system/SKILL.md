@@ -465,6 +465,9 @@ The server runs root motion authoritatively; clients predict and correct via
 | Two montages sharing the same slot group | Use distinct slot names (`UpperBody`, `LowerBody`) or `bStopAllMontages=false` |
 | Skipping `Super::NativeInitializeAnimation()` | Always call super — it initializes the proxy and skeleton |
 | Calling non-thread-safe UObject methods in thread-safe update | Only read primitive `UPROPERTY` copies; never call `GetOwningActor()` from worker thread |
+| Assuming a source clip's full length is usable content (e.g. driving phase timing off `GetPlayLength()`) | Sample the actual pose first — see below |
+
+**Trusting a source clip's nominal length/structure without sampling it.** Mocap/marketplace clips are often untrimmed takes — a "slide loop" clip may open with half a second of standing pose before the character reaches the sliding posture, or an "out" clip may run through an entire stand-up-to-locomotion cycle. Designing phase timing (blend windows, state-machine advance times) around the clip's raw duration then either exposes the wrong pose mid-transition or blocks the next state for far longer than intended. Before wiring up a new source asset, sample it with `unreal.AnimPoseExtensions.get_bone_pose` / `get_anim_pose_at_time` (Editor Python) at a few timestamps to see what pose is actually present when, then drive playback with an explicitly authored effective duration (and `SetStartPosition`/`SetPlayRate` to skip unusable lead-in) rather than the asset's `GetPlayLength()`.
 
 ---
 

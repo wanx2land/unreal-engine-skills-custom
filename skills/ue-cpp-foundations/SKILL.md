@@ -492,6 +492,8 @@ void AMyActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 **AddDynamic with a non-UFUNCTION — compile error or crash at runtime.**
 
+**Subclassing an engine class whose ctor/dtor isn't exported — LNK2019 with no explanation in the header.** Some engine classes (e.g. Mover's `USmoothWalkingMode`/`USimpleWalkingMode`) are designed for Blueprint-only use; their headers don't say so, and the class compiles fine — the link fails on the vtable/ctor/dtor symbols. Before subclassing an unfamiliar engine class in C++, check that its module exports it: grep the class's `UCLASS()`/ctor for a `MinimalAPI`/`<MODULE>_API` marker in the engine source, or (Installed Build, no source) parse the module DLL's PE export table for the ctor/dtor mangled name. If unexported, subclass the nearest exported base instead and reimplement the needed virtual entry point.
+
 ---
 
 ## Related Skills
